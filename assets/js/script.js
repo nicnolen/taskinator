@@ -5,25 +5,35 @@ var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do");
 
 // FUNCTIONS
-// Dynamically create the task item
-var createTaskHandler = function(event) {
+var taskFormHandler = function(event) {
     // preventing the browser from using its default behavior
     event.preventDefault();
-    
+    // assign variables for the task name and the task type
     var taskNameInput = document.querySelector("input[name='task-name']").value;
     var taskTypeInput = document.querySelector("select[name='task-type']").value;
 
+    // package up data as an object
+    var taskDataObj = {
+        name: taskNameInput,
+        type: taskTypeInput
+    };
+
+    // send it as an argument to createTaskEl
+    createTaskEl(taskDataObj);
+}
+
+// Function to create a new task HTML Element
+var createTaskEl = function(taskDataObj) {
     // create new list item
     var listItemEl = document.createElement("li");
     listItemEl.className = "task-item";
     
     // create div to hold task info and add to list item
     var taskInfoEl = document.createElement("div");
-    // giv div a class name
+    // give div a class name
     taskInfoEl.className = "task-info";
-    
     // add HTML content to div
-    taskInfoEl.innerHTML = "<h3 class='task-name'>" + taskNameInput + "</h3><span class='task-type'>" + taskTypeInput + "</span>";
+    taskInfoEl.innerHTML = "<h3 class='task-name'>" + taskDataObj.name + "</h3><span class='task-type'>" + taskDataObj.type + "</span>";
     listItemEl.appendChild(taskInfoEl);
 
     // append (add) the child element (li) to the end of the parent element (ul)
@@ -31,4 +41,4 @@ var createTaskHandler = function(event) {
 }
 
 // Event Listener for list item DOM
-formEl.addEventListener("submit", createTaskHandler);
+formEl.addEventListener("submit", taskFormHandler);
