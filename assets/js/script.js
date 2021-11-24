@@ -22,6 +22,16 @@ var taskFormHandler = function(event) {
     var taskNameInput = document.querySelector("input[name='task-name']").value;
     var taskTypeInput = document.querySelector("select[name='task-type']").value;
 
+    // check if input values are empty strings
+    if (!taskNameInput || !taskTypeInput) {
+        alert("You need to fill out the task form!");
+        return false;
+    }
+
+    // reset the form
+    document.querySelector("input[name='task-name']").value = "";
+    document.querySelector("select[name='task-type']").selectedIndex = 0;
+
     // check if an element has the data-task-id attribute
     var isEdit = formEl.hasAttribute("data-task-id");
 
@@ -40,22 +50,7 @@ var taskFormHandler = function(event) {
 
         createTaskEl(taskDataObj);
     }
-
-    // package up data as an object
-    var taskDataObj = {
-        name: taskNameInput,
-        type: taskTypeInput
-    };
-
-    // check if input values are empty strings
-    if (!taskNameInput || !taskTypeInput) {
-        alert("You need to fill out the task form!");
-        return false;
-    }
-
-    // reset the form
-    formEl.reset();
-}
+};
 
 // Function to create a new task HTML Element
 var createTaskEl = function(taskDataObj) {
@@ -86,7 +81,7 @@ var createTaskEl = function(taskDataObj) {
 
     tasks.push(taskDataObj);
 
-    localStorage.setItem("tasks", tasks);
+    saveTasks();
 
     // increase task counter for next unique id
     taskIdCounter++;
@@ -140,40 +135,6 @@ var createTaskActions = function(taskId) {
     return actionContainerEl;
 };
 
-// Create a taskButtonHandler function
-var taskButtonHandler = function(event) {
-    // get target element from event
-    var targetEl = event.target;
-
-    // edit button was clicked
-    if (targetEl.matches(".edit-btn")) {
-        var taskId = targetEl.getAttribute("data-task-id");
-        editTask(taskId);
-    }
-    // delete button was clicked
-    else if (targetEl.matches(".delete-btn")) {
-        // get the element's task id
-        var taskId = targetEl.getAttribute("data-task-id");
-        deleteTask(taskId);
-    }
-};
-
-// Function for editing
-var editTask = function(taskId) {
-    // get task list item element
-    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
-
-    // get content from task name and type
-    var taskName = taskSelected.querySelector("h3.task-name").textContent;
-    var taskType = taskSelected.querySelector("span.task-type").textContent;
-
-    document.querySelector("input[name='task-name']").value = taskName;
-    document.querySelector("select[name='task-type']").value = taskType;
-    document.querySelector("#save-task").textContent = "Save Task";
-
-    formEl.setAttribute("data-task-id", taskId);
-}
-
 // Function for completing the editing
 var completeEditTask = function(taskName, taskType, taskId) {
     
@@ -194,33 +155,29 @@ var completeEditTask = function(taskName, taskType, taskId) {
 
     alert("Task Updated");
 
-    localStorage.setItem("tasks", tasks);
+    saveTasks();
 
     // reset the form
     formEl.removeAttribute("data-task-id");
     document.querySelector("#save-task").textContent = "Add Task";
 };
 
-// Function for deleting 
-var deleteTask = function(taskId) {
-    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
-    taskSelected.remove();
+// Create a taskButtonHandler function
+var taskButtonHandler = function(event) {
+    // get target element from event
+    var targetEl = event.target;
 
-    // create new array to hold updated list of tasks
-    var updatedTaskArr = [];
-
-    // loop through current tasks
-    for (var i = 0; i < tasks.length; i++) {
-        // if tasks[i].id doesn't match the value of taskId, let's keep that task and push it into the new array
-        if (tasks[i].id !== parseInt(taskId)) {
-            updatedTaskArr.push(tasks[i]);
-        }
+    // edit button was clicked
+    if (targetEl.matches(".edit-btn")) {
+        var taskId = targetEl.getAttribute("data-task-id");
+        editTask(taskId);
     }
-
-    // reassign tasks array to be the same as updatedTaskArr
-    tasks = updatedTaskArr;
-
-    localStorage.setItem("tasks", tasks);
+    // delete button was clicked
+    else if (targetEl.matches(".delete-btn")) {
+        // get the element's task id
+        var taskId = targetEl.getAttribute("data-task-id");
+        deleteTask(taskId);
+    }
 };
 
 // Function for the taskStatusChangeHandler
@@ -251,7 +208,55 @@ var taskStatusChangeHandler = function(event) {
         }
     }
 
-    localStorage.setItem("tasks", tasks);
+    saveTasks();
+};
+
+// Function to edit task
+var editTask = function (taskId) {
+    console.log(taskId);
+  
+    // get task list item element
+    var taskSelected = document.querySelector(
+      ".task-item[data-task-id='" + taskId + "']"
+    );
+  
+    // get content from task name and type
+    var taskName = taskSelected.querySelector("h3.task-name").textContent;
+    console.log(taskName);
+  
+    var taskType = taskSelected.querySelector("span.task-type").textContent;
+    console.log(taskType);
+  
+    // write values of taskName and taskType to form to be edited
+    document.querySelector("input[name='task-name']").value = taskName;
+    document.querySelector("select[name='task-type']").value = taskType;
+  
+    // set data attribute to the form with a value of the task's id so it knows which one is being edited
+    formEl.setAttribute("data-task-id", taskId);
+    // update form's button to reflect editing a task rather than creating a new one
+    formEl.querySelector("#save-task").textContent = "Save Task";
+  };
+
+// Function for deleting 
+var deleteTask = function(taskId) {
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+    taskSelected.remove();
+
+    // create new array to hold updated list of tasks
+    var updatedTaskArr = [];
+
+    // loop through current tasks
+    for (var i = 0; i < tasks.length; i++) {
+        // if tasks[i].id doesn't match the value of taskId, let's keep that task and push it into the new array
+        if (tasks[i].id !== parseInt(taskId)) {
+            updatedTaskArr.push(tasks[i]);
+        }
+    }
+
+    // reassign tasks array to be the same as updatedTaskArr
+    tasks = updatedTaskArr;
+
+    saveTasks();
 };
 
 // Function for saving tasks to localStorage
