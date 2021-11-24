@@ -85,7 +85,9 @@ var createTaskEl = function(taskDataObj) {
 
     // increase task counter for next unique id
     taskIdCounter++;
+    console.log(listItemEl);
 };
+
 
 // Add buttons and dropdowns that reference each id
 var createTaskActions = function(taskId) {
@@ -264,12 +266,35 @@ var saveTasks = function() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
+// Function for loading tasks from localStorage
+var loadTasks = function() {
+    var savedTasks = localStorage.getItem("tasks");
+    // if there are no tasks, set tasks to an empty array and return out of the function
+    if (!savedTasks) {
+      return false;
+    }
+    // else, load up saved tasks
+    console.log("Saved tasks found!");
+  
+    // parse into array of objects
+    savedTasks = JSON.parse(savedTasks);
+  
+    // loop through savedTasks array
+    for (var i = 0; i < savedTasks.length; i++) {
+      // pass each task object into the `createTaskEl()` function
+      createTaskEl(savedTasks[i]);
+    }
+};
+
 // EVENT LISTENERS
-// Event Listener for list item DOM
+// create a new task
 formEl.addEventListener("submit", taskFormHandler);
 
-// Event Listener for the main section
+// for edit and delete buttons
 pageContentEl.addEventListener("click", taskButtonHandler);
 
-// Event Listener that changes every time the form elements value changes ("change")
+// for changing the status
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
+
+// Call loadTasks()
+loadTasks();
